@@ -30,10 +30,20 @@ public class ExchangeRatesClient {
         public Currency[] currencies;
     }
 
+    public class RemainingQuotesResponse extends ApiResponse {
+        public String remaining_quotes;
+    }
+
     public class ApiResponse {
-        public boolean IsSuccessful = false;
-        public String ErrorMessage = null;
-        public String RawJsonResponse = null;
+        public boolean isSuccessful = false;
+        public String errorMessage = null;
+        public String rawJsonResponse = null;
+
+        public void Copy(ApiResponse copyFrom) {
+            isSuccessful = copyFrom.isSuccessful;
+            errorMessage = copyFrom.errorMessage;
+            rawJsonResponse = copyFrom.rawJsonResponse;
+        }
     }
 
     private String base_url = "https://www.oanda.com/rates/api/v1/";
@@ -96,12 +106,12 @@ public class ExchangeRatesClient {
                 while ((line = br.readLine()) != null) {
                     jsonBuilder.append(line);
                 }
-                response.IsSuccessful = true;
-                response.RawJsonResponse = jsonBuilder.toString();
+                response.isSuccessful = true;
+                response.rawJsonResponse = jsonBuilder.toString();
             } else {
                 // print error message
                 String responseString = EntityUtils.toString(entity, "UTF-8");
-                response.ErrorMessage = responseString;
+                response.errorMessage = responseString;
             }
         } finally {
             httpClient.getConnectionManager().shutdown();
@@ -112,17 +122,16 @@ public class ExchangeRatesClient {
     public CurrenciesResponse GetCurrencies() throws IOException {
         ApiResponse response = SendRequest("currencies.json");
         CurrenciesResponse curResponse;
-        if (response.IsSuccessful) {
+        if (response.isSuccessful) {
             Gson gson = new Gson();
-            curResponse = gson.fromJson(response.RawJsonResponse, CurrenciesResponse.class);
+            curResponse = gson.fromJson(response.rawJsonResponse, CurrenciesResponse.class);
         }
         else {
             curResponse = new CurrenciesResponse();
         }
 
-        curResponse.IsSuccessful = response.IsSuccessful;
-        curResponse.RawJsonResponse = response.RawJsonResponse;
-        curResponse.ErrorMessage = response.ErrorMessage;
+        curResponse.Copy(response);
+
         return curResponse;
     }
 
@@ -130,7 +139,19 @@ public class ExchangeRatesClient {
         
     }
 
-    public void GetRemainingQuotes() {
-        
+    public RemainingQuotesResponse GetRemainingQuotes() throws IOException {
+        ApiResponse response = SendRequest("remaining_quotes.json");
+        RemainingQuotesResponse remainingQuotesResponse;
+        if (response.isSuccessful) {
+            Gson gson = new Gson();
+            remainingQuotesResponse = gson.fromJson(response.rawJsonResponse, RemainingQuotesResponse.class);
+        }
+        else {
+            remainingQuotesResponse = new RemainingQuotesResponse();
+        }
+
+        remainingQuotesResponse.Copy(response);
+
+        return remainingQuotesResponse;
     }
 }

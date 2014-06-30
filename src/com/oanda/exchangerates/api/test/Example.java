@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.oanda.exchangerates.api.ExchangeRatesClient;
 import com.oanda.exchangerates.api.ExchangeRatesClient.CurrenciesResponse;
+import com.oanda.exchangerates.api.ExchangeRatesClient.RemainingQuotesResponse;
 
 public class Example {
     private ExchangeRatesClient client = null;
@@ -11,7 +12,7 @@ public class Example {
     private void GetCurrencies() {
         try {
             CurrenciesResponse response = client.GetCurrencies();
-            if (response.IsSuccessful) {
+            if (response.isSuccessful) {
                 if (response.currencies != null) {
                     for (int i = 0 ; i < response.currencies.length ; i++) {
                         System.out.println(response.currencies[i].code + ":" + response.currencies[i].description);
@@ -19,7 +20,24 @@ public class Example {
                 }
             }
             else {
-                System.out.println(response.ErrorMessage);
+                System.out.println(response.errorMessage);
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private void GetRemainingQuotes() {
+        try {
+            RemainingQuotesResponse response = client.GetRemainingQuotes();
+            if (response.isSuccessful) {
+                if (response.remaining_quotes != null) {
+                    System.out.println("Remaining Quotes: " + response.remaining_quotes);
+                }
+            }
+            else {
+                System.out.println(response.errorMessage);
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -30,6 +48,7 @@ public class Example {
     private void init(String api_key) {
         client = new ExchangeRatesClient(api_key);
         GetCurrencies();
+        GetRemainingQuotes();
     }
 
     public static void main(String[] args) throws Exception {
