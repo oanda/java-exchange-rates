@@ -85,6 +85,7 @@ public class ExchangeRatesClient {
         try {
             HttpUriRequest httpGet = new HttpGet(url);
             httpGet.setHeader(new BasicHeader("Authorization", authHeader));
+            httpGet.setHeader("User-Agent", "OANDAExchangeRates.Java/0.01");
 
             //still needs work & testing for proxy.
 //            if (proxy_url != null) {
