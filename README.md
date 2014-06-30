@@ -2,7 +2,7 @@ java-exchange-rates
 ===================
 OANDA Exchange Rates API client class for Java
 
-This class provides an easy interface to the [OANDA Exchange Rates API](http://www.oanda.com/rates) using C#. The [API documentation page](http://developer.oanda.com/exchange-rates-api/) has a full reference of all the endpoints.  This service requires you to [sign up](http://www.oanda.com/rates/#pricing) for a trial or paying subscription to obtain an API key.
+This class provides an easy interface to the [OANDA Exchange Rates API](http://www.oanda.com/rates) using Java. The [API documentation page](http://developer.oanda.com/exchange-rates-api/) has a full reference of all the endpoints.  This service requires you to [sign up](http://www.oanda.com/rates/#pricing) for a trial or paying subscription to obtain an API key.
 
 - [Installation](#installation)
 - [Usage](#usage)
