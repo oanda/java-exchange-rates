@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -26,12 +27,61 @@ public class ExchangeRatesClient {
         public String description;
     }
 
+    public class Quote {
+        public String ask;
+        public String bid;
+        public String date;
+        public String high_ask;
+        public String high_bid;
+        public String low_ask;
+        public String low_bid;
+        public String midpoint;
+    }
+
+    public class EffectiveParams {
+        public int decimal_places;
+        public String[] fields;
+        public String[] quote_currencies;
+        public String date;
+    }
+
+    public class Meta {
+        public EffectiveParams effective_params;
+        public String[] skipped_currencies;
+        public String request_time;
+    }
+
     public class CurrenciesResponse extends ApiResponse {
         public Currency[] currencies;
     }
 
     public class RemainingQuotesResponse extends ApiResponse {
         public String remaining_quotes;
+    }
+
+    public class RatesResponse extends ApiResponse {
+        public String base_currency;
+        public Meta meta;
+        public Map<String, Quote> quotes;
+    }
+
+    public enum RateFields {
+        all("all"),
+        averages("averages"),
+        midpoint("midpoint"),
+        highs("highs"),
+        lows("lows");
+
+        private final String text;
+
+        private RateFields(final String text) {
+            this.text = text;
+        }
+
+        @Override
+        public String toString() {
+            return text;
+        }
     }
 
     public class ApiResponse {
@@ -75,7 +125,51 @@ public class ExchangeRatesClient {
         }
     }
 
-    public ApiResponse SendRequest(String requestName) throws IOException {
+    private void AppendToQueryString(StringBuilder sb, String key, String value) {
+        if (sb.length() == 0) {
+            sb.append("?");
+        }
+        else {
+            sb.append("&");
+        }
+        sb.append(key + "=" + value);
+    }
+
+    private String GetRatesParameterQueryString(String[] quotes, RateFields[] fields, String decimalPlaces, String date, String start, String end) {
+        StringBuilder queryStringBuilder = new StringBuilder();
+
+        if (quotes != null) {
+            for (int i = 0 ; i < quotes.length ; i++) {
+                String quote = quotes[i];
+                if ((quote != null) && (quote.trim().length() != 0)) {
+                    AppendToQueryString(queryStringBuilder, "quote", quote);
+                }
+            }
+        }
+
+        if (fields != null) {
+            for (int i = 0 ; i < fields.length ; i++) {
+                String fieldValue = fields[i].toString();
+                AppendToQueryString(queryStringBuilder, "fields", fieldValue);
+            }
+        }
+
+        if ((date != null) && (date.trim().length() != 0)) {
+            AppendToQueryString(queryStringBuilder, "date", date);
+        }
+
+        if ((start != null) && (start.trim().length() != 0)) {
+            AppendToQueryString(queryStringBuilder, "start", start);
+        }
+
+        if ((end != null) && (end.trim().length() != 0)) {
+            AppendToQueryString(queryStringBuilder, "end", end);
+        }
+
+        return queryStringBuilder.toString();
+    }
+
+    private ApiResponse SendRequest(String requestName) throws IOException {
         DefaultHttpClient httpClient = new DefaultHttpClient();
         String url = String.format("%s%s", base_url, requestName);
         String authHeader = String.format("Bearer %s", api_key);
@@ -136,8 +230,23 @@ public class ExchangeRatesClient {
         return curResponse;
     }
 
-    public void GetRates() {
-        
+    public RatesResponse GetRates(String baseCurrency, String[] quotes, RateFields[] fields, String decimalPlaces, String date, String start, String end) throws IOException {
+        String queryStr = GetRatesParameterQueryString(quotes, fields, decimalPlaces, date, start, end);
+        String requestStr = String.format("rates/%s.json%s", baseCurrency, queryStr);
+
+        ApiResponse response = SendRequest(requestStr);
+        RatesResponse ratesResponse;
+        if (response.isSuccessful) {
+            Gson gson = new Gson();
+            ratesResponse = gson.fromJson(response.rawJsonResponse, RatesResponse.class);
+        }
+        else {
+            ratesResponse = new RatesResponse();
+        }
+
+        ratesResponse.Copy(response);
+
+        return ratesResponse;
     }
 
     public RemainingQuotesResponse GetRemainingQuotes() throws IOException {
