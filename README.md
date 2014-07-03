@@ -11,10 +11,15 @@ This class provides an easy interface to the [OANDA Exchange Rates API](http://w
 - [Release History](#release_history)
 
 ## <a name="installation"></a>Installation
+Maven is used for building. Install from http://maven.apache.org/download.cgi. On Ubuntu, you can run sudo apt-get install maven.
 
+Apache httpclient, httpcore, and commons-logging external jar files are referenced.
+Google's gson (https://code.google.com/p/google-gson/) is also used to parse json.
 
 ## <a name="usage"></a>Usage
 
+Include ExchangeRatesClient.java as part of the project, as well as dependent jar files.
+Usage example is shown in included Example.java.
 
 ## <a name="author"></a>Author
 

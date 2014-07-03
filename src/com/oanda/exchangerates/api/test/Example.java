@@ -81,6 +81,7 @@ public class Example {
             e.printStackTrace();
         }
     }
+
     private void init(String api_key) {
         client = new ExchangeRatesClient(api_key);
         GetCurrencies();

@@ -181,12 +181,11 @@ public class ExchangeRatesClient {
             httpGet.setHeader(new BasicHeader("Authorization", authHeader));
             httpGet.setHeader("User-Agent", "OANDAExchangeRates.Java/0.01");
 
-            //still needs work & testing for proxy.
-//            if (proxy_url != null) {
-//                HttpHost proxy = new HttpHost(proxy_url, proxy_port);
-//                httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-//            }
-            
+            if (proxy_url != null) {
+                HttpHost proxy = new HttpHost(proxy_url, proxy_port);
+                httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+            }
+
             System.out.println("Executing request: " + httpGet.getRequestLine());
 
             HttpResponse resp = httpClient.execute(httpGet);
@@ -231,11 +230,16 @@ public class ExchangeRatesClient {
     }
 
     public RatesResponse GetRates(String baseCurrency, String[] quotes, RateFields[] fields, String decimalPlaces, String date, String start, String end) throws IOException {
+        RatesResponse ratesResponse;
+        if ((baseCurrency == null) || baseCurrency.isEmpty()) {
+            ratesResponse = new RatesResponse();
+            ratesResponse.errorMessage = "baseCurrency is not set";
+            return ratesResponse;
+        }
         String queryStr = GetRatesParameterQueryString(quotes, fields, decimalPlaces, date, start, end);
         String requestStr = String.format("rates/%s.json%s", baseCurrency, queryStr);
 
         ApiResponse response = SendRequest(requestStr);
-        RatesResponse ratesResponse;
         if (response.isSuccessful) {
             Gson gson = new Gson();
             ratesResponse = gson.fromJson(response.rawJsonResponse, RatesResponse.class);
