@@ -184,6 +184,7 @@ public class ExchangeRatesClient {
             if (proxy_url != null) {
                 HttpHost proxy = new HttpHost(proxy_url, proxy_port);
                 httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+                System.out.println("Using Proxy: " + proxy_url + ":" + proxy_port);
             }
 
             System.out.println("Executing request: " + httpGet.getRequestLine());
