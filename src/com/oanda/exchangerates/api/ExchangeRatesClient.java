@@ -36,6 +36,7 @@ public class ExchangeRatesClient {
         public String low_ask;
         public String low_bid;
         public String midpoint;
+        public String spot;
     }
 
     public class EffectiveParams {
@@ -43,6 +44,7 @@ public class ExchangeRatesClient {
         public String[] fields;
         public String[] quote_currencies;
         public String date;
+        public String data_set;
     }
 
     public class Meta {
@@ -135,7 +137,16 @@ public class ExchangeRatesClient {
         sb.append(key + "=" + value);
     }
 
-    private String GetRatesParameterQueryString(String[] quotes, RateFields[] fields, String decimalPlaces, String date, String start, String end) {
+    private String GetCurrenciesParameterQueryString(String dataSet) {
+        StringBuilder queryStringBuilder = new StringBuilder();
+
+        if ((dataSet != null) && (!dataSet.isEmpty())) {
+            AppendToQueryString(queryStringBuilder, "data_set", dataSet);
+        }
+        return queryStringBuilder.toString();
+    }
+
+    private String GetRatesParameterQueryString(String[] quotes, RateFields[] fields, String decimalPlaces, String date, String start, String end, String dataSet) {
         StringBuilder queryStringBuilder = new StringBuilder();
 
         if (quotes != null) {
@@ -166,6 +177,9 @@ public class ExchangeRatesClient {
             AppendToQueryString(queryStringBuilder, "end", end);
         }
 
+        if ((dataSet != null) && (!dataSet.isEmpty())) {
+            AppendToQueryString(queryStringBuilder, "data_set", dataSet);
+        }
         return queryStringBuilder.toString();
     }
 
@@ -214,8 +228,10 @@ public class ExchangeRatesClient {
         return response;
     }
 
-    public CurrenciesResponse GetCurrencies() throws IOException {
-        ApiResponse response = SendRequest("currencies.json");
+    public CurrenciesResponse GetCurrencies(String dataSet) throws IOException {
+        String queryStr = GetCurrenciesParameterQueryString(dataSet);
+        String requestStr = String.format("currencies.json%s", queryStr);
+        ApiResponse response = SendRequest(requestStr);
         CurrenciesResponse curResponse;
         if (response.isSuccessful) {
             Gson gson = new Gson();
@@ -230,14 +246,14 @@ public class ExchangeRatesClient {
         return curResponse;
     }
 
-    public RatesResponse GetRates(String baseCurrency, String[] quotes, RateFields[] fields, String decimalPlaces, String date, String start, String end) throws IOException {
+    public RatesResponse GetRates(String baseCurrency, String[] quotes, RateFields[] fields, String decimalPlaces, String date, String start, String end, String dataSet) throws IOException {
         RatesResponse ratesResponse;
         if ((baseCurrency == null) || baseCurrency.isEmpty()) {
             ratesResponse = new RatesResponse();
             ratesResponse.errorMessage = "baseCurrency is not set";
             return ratesResponse;
         }
-        String queryStr = GetRatesParameterQueryString(quotes, fields, decimalPlaces, date, start, end);
+        String queryStr = GetRatesParameterQueryString(quotes, fields, decimalPlaces, date, start, end, dataSet);
         String requestStr = String.format("rates/%s.json%s", baseCurrency, queryStr);
 
         ApiResponse response = SendRequest(requestStr);

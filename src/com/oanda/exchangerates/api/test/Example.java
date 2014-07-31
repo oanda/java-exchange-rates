@@ -13,9 +13,9 @@ import com.oanda.exchangerates.api.ExchangeRatesClient.RemainingQuotesResponse;
 public class Example {
     private ExchangeRatesClient client = null;
 
-    private void GetCurrencies() {
+    private void GetCurrencies(String dataSet) {
         try {
-            CurrenciesResponse response = client.GetCurrencies();
+            CurrenciesResponse response = client.GetCurrencies(dataSet);
             if (response.isSuccessful) {
                 if (response.currencies != null) {
                     for (int i = 0 ; i < response.currencies.length ; i++) {
@@ -49,12 +49,12 @@ public class Example {
         }
     }
 
-    private void GetRates(String baseCurrency, String[] quotes, RateFields[] fields, String decimalPlaces, String date, String start, String end) {
+    private void GetRates(String baseCurrency, String[] quotes, RateFields[] fields, String decimalPlaces, String date, String start, String end, String dataSet) {
         try {
-            RatesResponse response = client.GetRates(baseCurrency, quotes, fields, decimalPlaces, date, start, end);
+            RatesResponse response = client.GetRates(baseCurrency, quotes, fields, decimalPlaces, date, start, end, dataSet);
             if (response.isSuccessful) {
                 System.out.println("GetRates: base currency=" + response.base_currency + " date=" + response.meta.effective_params.date
-                        + " decimal places=" + response.meta.effective_params.decimal_places);
+                        + " decimal places=" + response.meta.effective_params.decimal_places + " data_set=" + response.meta.effective_params.data_set);
                 for (int i = 0 ; i < response.meta.effective_params.fields.length ; i++) {
                     System.out.println("fields[" + i + "]=" + response.meta.effective_params.fields[i]);
                 }
@@ -70,7 +70,7 @@ public class Example {
                 while (iterator.hasNext()) {
                     String key = iterator.next();
                     Quote quote = response.quotes.get(key);
-                    System.out.println(key + " : ask=" + quote.ask + " bid=" + quote.bid + " date=" + quote.date);
+                    System.out.println(key + " : ask=" + quote.ask + " bid=" + quote.bid + " spot=" + quote.spot + " date=" + quote.date);
                 }
             }
             else {
@@ -84,9 +84,9 @@ public class Example {
 
     private void init(String api_key) {
         client = new ExchangeRatesClient(api_key);
-        GetCurrencies();
+        GetCurrencies(null);
         GetRemainingQuotes();
-        GetRates("USD", new String[] {"ADF", "CHF"}, null, null, null, null, null);
+        GetRates("USD", new String[] {"AUD", "CHF"}, null, null, null, null, null, null);
     }
 
     public static void main(String[] args) throws Exception {
