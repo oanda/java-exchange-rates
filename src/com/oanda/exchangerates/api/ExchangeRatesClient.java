@@ -98,7 +98,7 @@ public class ExchangeRatesClient {
         }
     }
 
-    private String base_url = "https://www.oanda.com/rates/api/v1/";
+    private String base_url = "https://web-services.oanda.com/rates/api/v1/";
     private String api_key = null;
     private String proxy_url = null;
     private int proxy_port = 0;
